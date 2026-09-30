@@ -3,6 +3,12 @@ set -e
 
 cd /var/www/html
 
+# Bootstrap is owned by the `app` container only; other containers built from
+# this image (queue-worker) wait for app to become healthy and skip straight to CMD.
+if [ "${SKIP_BOOTSTRAP:-0}" = "1" ]; then
+    exec "$@"
+fi
+
 if [ ! -f artisan ]; then
     echo "No Laravel app found in ./src — bootstrapping a new project..."
     composer create-project laravel/laravel:^8.0 . --prefer-dist --no-interaction
