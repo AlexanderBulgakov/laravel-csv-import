@@ -1,0 +1,88 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    volumes:
+      - ./src:/var/www/html
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${MYSQL_DB:-laravel}
+      DB_USERNAME: ${MYSQL_USER:-laravel}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-secret}
+      REDIS_HOST: valkey
+      REDIS_PORT: 6379
+      CACHE_STORE: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+    depends_on:
+      db:
+        condition: service_healthy
+      valkey:
+        condition: service_started
+
+  queue-worker:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    command: php artisan queue:work redis --tries=3 --timeout=90
+    volumes:
+      - ./src:/var/www/html
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${MYSQL_DB:-laravel}
+      DB_USERNAME: ${MYSQL_USER:-laravel}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-secret}
+      REDIS_HOST: valkey
+      REDIS_PORT: 6379
+      QUEUE_CONNECTION: redis
+    depends_on:
+      - app
+      - valkey
+      - db
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "${APP_PORT:-80}:80"
+    volumes:
+      - ./src:/var/www/html:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DB:-laravel}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-secret}
+      MYSQL_USER: ${MYSQL_USER:-laravel}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-secret}
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u${MYSQL_USER:-laravel}", "-p${MYSQL_PASSWORD:-secret}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "3306:3306"
+
+  valkey:
+    image: valkey/valkey:8-alpine
+
+  node:
+    image: node:16-alpine
+    working_dir: /var/www/html
+    volumes:
+      - ./src:/var/www/html
+    ports:
+      - "5173:5173"
+    command: sh -c "npm install && npm run dev -- --host"
+
+volumes:
+  dbdata:

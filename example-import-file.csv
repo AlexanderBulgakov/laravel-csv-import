@@ -1,0 +1,2 @@
+external_id,created_at,first_name,last_name,phone,email,city,source,utm_campaign,product,budget_uah,status,manager,comment,next_contact_at
+LD-000001,2025-07-10 05:06:54,First,Last,+381234567890,test@test.test,city,Facebook Ads,catalog_2026,Контекстна реклама,23 700,in_progress,Manager,,2025-07-23 05:06:54
