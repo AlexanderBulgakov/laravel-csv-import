@@ -37,7 +37,7 @@ services:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
-    command: php artisan queue:work redis --tries=3 --timeout=90
+    command: php artisan queue:work redis --tries=3 --timeout=60
     restart: unless-stopped
     volumes:
       - ./src:/var/www/html
