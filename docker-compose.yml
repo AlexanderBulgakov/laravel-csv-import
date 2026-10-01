@@ -102,6 +102,15 @@ services:
     # Laravel 8 ships Laravel Mix (webpack), not Vite. Polling because inotify events
     # don't reliably cross the Docker Desktop bind mount.
     command: sh -c "npm install && npm run watch-poll"
+  
+  adminer:
+    image: adminer:latest
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   dbdata:
