@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ImportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,5 +15,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('imports.create');
 });
+
+Route::get('/imports/create', [ImportController::class, 'create'])->name('imports.create');
+Route::get('/imports', function () {
+    return redirect()->route('imports.create');
+});
+Route::post('/imports', [ImportController::class, 'store'])->name('imports.store');
+Route::get('/imports/{import}', [ImportController::class, 'show'])->name('imports.show');
