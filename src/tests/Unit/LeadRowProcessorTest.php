@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use Tests\TestCase;
 use App\Imports\LeadRowProcessor;
+use App\Imports\CsvLeadHeader;
 
 class LeadRowProcessorTest extends TestCase
 {
@@ -15,23 +16,7 @@ class LeadRowProcessorTest extends TestCase
     {
         parent::setUp();
 
-        $this->header = [
-            'external_id',
-            'created_at',
-            'first_name',
-            'last_name',
-            'phone',
-            'email',
-            'city',
-            'source',
-            'utm_campaign',
-            'product',
-            'budget_uah',
-            'status',
-            'manager',
-            'comment',
-            'next_contact_at',
-        ];
+        $this->header = CsvLeadHeader::getHeader();
 
         $this->row = [
             'LD-000001',
