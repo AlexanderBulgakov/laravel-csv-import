@@ -17,6 +17,13 @@ class LeadRowProcessor
 
     public function process(array $row): array
     {
+        if ($row === [null]) {
+            return [
+                'data' => null,
+                'errors' => ['row' => ['Empty row.']],
+            ];
+        }
+
         if ($this->headerCount !== count($row)) {
             return [
                 'data' => null,
