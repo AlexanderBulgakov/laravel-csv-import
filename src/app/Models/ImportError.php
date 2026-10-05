@@ -18,11 +18,28 @@ class ImportError extends Model
 
     protected $casts = [
         'errors' => 'array',
+        'raw' => 'array',
         'line' => 'integer',
     ];
 
     public function import()
     {
         return $this->belongsTo(Import::class);
+    }
+
+    public function getErrValueAttribute()
+    {
+        $errResults = [];
+
+        foreach ($this->errors as $values) {
+            $errResults[] = implode('; ', $values);
+        }
+
+        return implode(' | ', $errResults);
+    }
+
+    public function getRawValueAttribute()
+    {
+        return implode(' | ', $this->raw);
     }
 }

@@ -19542,6 +19542,40 @@ __webpack_require__.r(__webpack_exports__);
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
 
 __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
+function updateProgress(url, element) {
+  axios.get(url).then(function (response) {
+    var progress = response.data.progress;
+    var finished = response.data.finished;
+    var status = response.data.status;
+    var total_rows = response.data.total_rows;
+    var processed_rows = response.data.processed_rows;
+    var failed_rows = response.data.failed_rows;
+    var error_message = response.data.error_message;
+    element.querySelector('.progress-bar').style.width = "".concat(progress, "%");
+    element.querySelector('.progress-value').textContent = "".concat(progress, "%");
+    element.querySelector('.js-status').textContent = status;
+    element.querySelector('.js-total_rows').textContent = total_rows;
+    element.querySelector('.js-processed_rows').textContent = processed_rows;
+    element.querySelector('.js-failed_rows').textContent = failed_rows;
+    element.querySelector('.js-error_message').textContent = error_message;
+    if (!finished) {
+      setTimeout(function () {
+        updateProgress(url, element);
+      }, 2000);
+    }
+  })["catch"](function (error) {
+    console.error('Error:', error);
+    setTimeout(function () {
+      updateProgress(url, element);
+    }, 4000);
+  });
+}
+document.querySelectorAll('.js-progress').forEach(function (element) {
+  if (element.dataset.finished === '1') {
+    return;
+  }
+  updateProgress(element.dataset.url, element);
+});
 
 /***/ }),
 

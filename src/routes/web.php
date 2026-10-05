@@ -24,3 +24,5 @@ Route::get('/imports', function () {
 });
 Route::post('/imports', [ImportController::class, 'store'])->name('imports.store');
 Route::get('/imports/{import}', [ImportController::class, 'show'])->name('imports.show');
+Route::get('/imports/{import}/status', [ImportController::class, 'status'])->name('imports.status');
+Route::get('/imports/{import}/errors', [ImportController::class, 'errors'])->name('imports.errors');

@@ -33,4 +33,9 @@ class Import extends Model
     {
         return $this->hasMany(ImportError::class);
     }
+
+    public function isFinished(): bool
+    {
+        return $this->status === Import::STATUS_COMPLETED || $this->status === Import::STATUS_FAILED;
+    }
 }
