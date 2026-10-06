@@ -1,3 +1,16 @@
+x-app-env: &app-env
+  DB_CONNECTION: mysql
+  DB_HOST: db
+  DB_PORT: 3306
+  DB_DATABASE: ${MYSQL_DB:-laravel}
+  DB_USERNAME: ${MYSQL_USER:-laravel}
+  DB_PASSWORD: ${MYSQL_PASSWORD:-secret}
+  REDIS_HOST: valkey
+  REDIS_PORT: 6379
+  CACHE_DRIVER: redis
+  SESSION_DRIVER: redis
+  QUEUE_CONNECTION: redis
+
 services:
   app:
     build:
@@ -6,17 +19,7 @@ services:
     volumes:
       - ./src:/var/www/html
     environment:
-      DB_CONNECTION: mysql
-      DB_HOST: db
-      DB_PORT: 3306
-      DB_DATABASE: ${MYSQL_DB:-laravel}
-      DB_USERNAME: ${MYSQL_USER:-laravel}
-      DB_PASSWORD: ${MYSQL_PASSWORD:-secret}
-      REDIS_HOST: valkey
-      REDIS_PORT: 6379
-      CACHE_DRIVER: redis
-      SESSION_DRIVER: redis
-      QUEUE_CONNECTION: redis
+      <<: *app-env
     depends_on:
       db:
         condition: service_healthy
@@ -42,15 +45,7 @@ services:
     volumes:
       - ./src:/var/www/html
     environment:
-      DB_CONNECTION: mysql
-      DB_HOST: db
-      DB_PORT: 3306
-      DB_DATABASE: ${MYSQL_DB:-laravel}
-      DB_USERNAME: ${MYSQL_USER:-laravel}
-      DB_PASSWORD: ${MYSQL_PASSWORD:-secret}
-      REDIS_HOST: valkey
-      REDIS_PORT: 6379
-      QUEUE_CONNECTION: redis
+      <<: *app-env
       SKIP_BOOTSTRAP: "1"
     depends_on:
       app:
