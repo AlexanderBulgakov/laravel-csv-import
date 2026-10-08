@@ -13,6 +13,7 @@ use App\Models\Import;
 use App\Imports\CsvLeadHeader;
 use App\Imports\LeadRowProcessor;
 use RuntimeException;
+use Illuminate\Database\QueryException;
 
 class ImportChunkJob implements ShouldQueue
 {
@@ -104,7 +105,14 @@ class ImportChunkJob implements ShouldQueue
             fclose($handle);
         }
 
-        $this->save($rowsData, $rowsErrors, $i);
+        try {
+            $this->save($rowsData, $rowsErrors, $i);
+        } catch (QueryException $e) {
+            $eLines = "lines {$this->startLine}-" . ($this->startLine + $i - 1);
+            $eCode = $e->getCode();
+
+            throw new \RuntimeException("import #{$this->importId}; $eLines; code:{$eCode}");
+        }
     }
 
     private function save(array $rowsData, array $rowsErrors, int $processed): void
@@ -143,6 +151,6 @@ class ImportChunkJob implements ShouldQueue
                         ),
                     ]
                 );
-        });
+        }, 3);
     }
 }
