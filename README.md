@@ -84,6 +84,61 @@ oversized file gets a normal validation error instead of a 413 response.
 | Invalid, reported with line number| 822    | `import_errors` (with raw data)   |
 | **Total**                         | **100 000** |                          |
 
+## Generating a test file
+
+The client's file is not included in the repository. To get a file in the same
+format, use the `leads:generate-csv` command:
+
+```
+docker compose exec app php artisan leads:generate-csv
+```
+
+This writes 100 000 rows to `storage/app/generated/leads-100000.csv`.
+Upload the file at `/imports/create` like any other CSV.
+
+### Arguments and options
+
+| Argument / option | Default | Description |
+|-------------------|---------|-------------|
+| `rows`            | `100000` | Number of data rows (the header is not counted) |
+| `--invalid=`      | `1`     | Share of invalid rows, in percent (`1` = 1%) |
+| `--duplicates=`   | `0`     | Share of rows that repeat an earlier `external_id`, in percent (`0.2` = 0.2%) |
+| `--seed=`         | random  | Seed for reproducible output: the same seed and options produce an identical file |
+| `--path=`         | `leads-{rows}.csv` | Output file name, relative to `storage/app/generated/` |
+
+Example: 5 000 rows, 2% invalid, 0.5% duplicates, reproducible:
+
+```
+docker compose exec app php artisan leads:generate-csv 5000 --invalid=2 --duplicates=0.5 --seed=42
+```
+
+When it finishes, the command prints how many rows it generated, how many are
+invalid and how many are duplicates, plus the time and memory it used.
+
+### What the generated data contains
+
+- Leads in the same format as the provided file: `external_id` like `LD-000001`,
+  dates as `Y-m-d H:i:s`, budget with a space as the thousands separator
+  (`23 700`), phone numbers like `380XXXXXXXXX`.
+- Empty optional fields (first name, email, UTM campaign, budget, manager,
+  comment) in roughly the same proportions as the provided file.
+- Comments containing commas and quotes, so some fields are written in quotes.
+- `next_contact_at` is always later than `created_at`, and empty for leads with
+  status `won`, `lost` or `spam`.
+- Invalid rows of several kinds: empty `external_id`, wrong date format,
+  impossible date (`2025-13-45`), empty `last_name`, invalid email, negative or
+  non-numeric budget, an extra column.
+- Duplicates both within one import chunk and across chunks, to exercise
+  deduplication and the upsert.
+
+The data is generated with Faker and does not contain any data from the
+client's file.
+
+Invalid rows and duplicates are chosen at random row by row, so their final
+counts are close to the requested percentages but not exact. A row can also
+end up both invalid and a duplicate, so after an import the number of merged
+duplicates can be slightly lower than the number the generator reports.
+
 ## Running tests
 
 Tests use a separate `laravel_testing` database, so the test suite does not touch the regular `laravel` database.

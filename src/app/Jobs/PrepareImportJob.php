@@ -22,6 +22,8 @@ class PrepareImportJob implements ShouldQueue
 
     public Import $import;
 
+    public const CHUNK_SIZE = 1000;
+
     /**
      * Create a new job instance.
      *
@@ -76,7 +78,7 @@ class PrepareImportJob implements ShouldQueue
             $startLine = 2;
             $offset = ftell($handle);
             $count = 0;
-            $limit = 1000;
+            $limit = self::CHUNK_SIZE;
             $totalRows = 0;
             $jobs = [];
 
